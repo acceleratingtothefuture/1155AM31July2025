@@ -1,13 +1,15 @@
 function prettyName(key) {
-  const map = {
-    all_cases: 'All Cases Received',
-    Filed: 'Cases Filed by Prosecutor',
-    Dismissed: 'Dismissed by Court',
-    Rejected: 'Declined to Prosecute',
-    Open: 'Open Case',
-    Sentenced: 'Sentenced'
-    // add more if needed
-  };
+ const map = {
+  all_cases : 'All Cases Received',
+  accepted  : 'Accepted Cases',
+  rejected  : 'Rejected Cases',
+
+  Filed     : 'Cases Filed by Prosecutor',
+  Dismissed : 'Dismissed by Court',
+  Rejected  : 'Declined to Prosecute',   // status value, not the new metric
+  Open      : 'Open Case',
+  Sentenced : 'Sentenced'
+};
   return map[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
@@ -119,7 +121,7 @@ defs.forEach(d => {
     ethnicity :  d.ethnicity || `Unknown`,
     gender    :  d.gender || `Unknown`,
     county_res:  d.county_res || `Unknown`,
-    age       :  d.age || `Unknown`,
+    age : d.age ?? null,          // keep it a number or null
   };
 
   /* date-helpers the dashboard expects */
@@ -128,12 +130,13 @@ defs.forEach(d => {
   row.year     = dt.getFullYear();
   row.month    = dt.getMonth() + 1;
   row.quarter  = Math.floor(dt.getMonth() / 3) + 1;
-  row.age_group = row.age == null ? 'Unknown' :
-        row.age < 18  ? '<18'  :
-        row.age <= 24 ? '18–24' :
-        row.age <= 34 ? '25–34' :
-        row.age <= 49 ? '35–49' :
-        row.age <= 64 ? '50–64' : '65+';
+  row.age_group = (Number.isFinite(row.age) ? row.age : null) == null ? 'Unknown' :
+       row.age < 18  ? '<18'  :
+       row.age <= 24 ? '18–24' :
+       row.age <= 34 ? '25–34' :
+       row.age <= 49 ? '35–49' :
+       row.age <= 64 ? '50–64' : '65+';
+
 
   rows.push(row);                           // ← push once
 });
@@ -151,7 +154,7 @@ document.getElementById('pieToggle').onchange = build;
 
 function initDimension() {
   const sel = document.getElementById('dimension');
-  const ignore = ['case_id', 'date_da', 'year', 'month', 'quarter', `ts`, `days_to_file`,`days_file_to_sent`, `age`];
+  const ignore = ['case_id', 'date_da', 'year', 'month', 'quarter', `ts`, `days_to_file`,`days_file_to_sent`, `age`, `status`];
   sel.innerHTML = Object.keys(rows[0])
     .filter(k => !ignore.includes(k))
     .map(k =>
@@ -267,15 +270,47 @@ if (g === undefined || g === null || g === '') g = 'Unknown';
     groupStatus[s][g][key]=(groupStatus[s][g][key]||0)+1;
   });
 
-  /* pick the slice to plot */
-  let bucketBase, groupBase;
-  if (metric === 'all_cases') {
-    bucketBase = allCounts;
-    groupBase  = groupAll;
-  } else {
-    bucketBase = statusCounts[metric] || {};
-    groupBase  = groupStatus[metric] || {};
+  /* ---------- map every metric to the counts it needs ---------- */
+function metricBuckets(metric){
+  switch (metric){
+
+    case 'all_cases':
+      return { bucket: allCounts, group: groupAll };
+
+    case 'rejected':
+      return { bucket: statusCounts.Rejected || {},
+               group : groupStatus.Rejected || {} };
+
+    case 'accepted': {          // everything *except* rejected
+      const bucket = {}, group = {};
+      ['Filed','Open','Sentenced','Dismissed'].forEach(s=>{
+        const src = statusCounts[s] || {};
+        for (const k in src) bucket[k]=(bucket[k]||0)+src[k];
+
+        const gsrc = groupStatus[s] || {};
+        for (const g in gsrc){
+          group[g]??={};
+          for (const k in gsrc[g])
+            group[g][k]=(group[g][k]||0)+gsrc[g][k];
+        }
+      });
+      return {bucket,group};
+    }
+
+    case 'Sentenced':
+    case 'Dismissed':
+      return { bucket: statusCounts[metric] || {},
+               group : groupStatus[metric] || {} };
+
+    default:
+      return { bucket:{}, group:{} };   // safety fallback
   }
+}
+
+
+/* which slice are we plotting? */
+const {bucket: bucketBase, group: groupBase} = metricBuckets(metric);
+
 
   if (pieMode) {
     const lineData = buckets.map(b=>bucketBase[b.key]||0);

@@ -1,84 +1,83 @@
-// victims.js
+/* victims.js — VICTIM SERVICES DASHBOARD */
 import { fadeColor } from './app.js';
 
-const WRAP = document.getElementById('victimStatsWrap');
-const DESC = document.getElementById('victimDescWrap');
-const SUB = document.getElementById('victimSub');
-const NAV = document.getElementById('victimYearNav');
-
-const COLORS = [
-  '#2196f3', '#e91e63', '#ff9800', '#4caf50', '#9c27b0', '#f44336', '#00bcd4'
-];
-
-const SERVICE_GROUPS = {
-  'Information and Referral': [
-    'Information about the criminal justice process',
-    'Information about victim rights',
-    'Help with obtaining notifications',
-    'Referral to other programs, services, or legal resources'
-  ],
-  'Personal Advocacy / Accompaniment': [
-    'Advocacy for interviews or exams',
-    'Help with benefits, housing, schools, immigration',
-    'Transportation and interpreter services'
-  ],
-  'Emotional Support or Safety Services': [
-    'Crisis counseling, on-scene response, and safety planning',
-    'Therapy and support groups',
-    'Emergency financial aid or housing support'
-  ],
-  'Shelter / Housing Services': [
-    'Emergency shelter or transitional housing',
-    'Relocation help and securing housing'
-  ],
-  'Criminal / Civil Justice System Assistance': [
-    'Help with court notifications and victim impact statements',
-    'Help with restitution and legal support',
-    'Support during criminal proceedings'
-  ]
+const FOLDER = './data/';
+const LETTERS = ['A','B','C','D','E'];
+const LETTER_DESC = {
+  A: 'Information and Referral',
+  B: 'Personal Advocacy / Accompaniment',
+  C: 'Emotional Support or Safety Services',
+  D: 'Shelter / Housing Services',
+  E: 'Criminal / Civil Justice System Assistance'
 };
 
-const DETAIL = document.createElement('div');
-DETAIL.className = 'victim-detail-card';
-DESC.appendChild(DETAIL);
+const COLORS = [
+  '#2196f3', '#4caf50', '#ff9800', '#e91e63', '#9c27b0'
+];
 
-function buildVictimPanel(rows) {
-  const year = 2023;
-  const services = {};
-  rows.filter(r => r.year === year).forEach(row => {
-    for (const type in SERVICE_GROUPS) {
-      if (!services[type]) services[type] = 0;
-      if (row[type]) services[type]++;
-    }
-  });
-
-  WRAP.innerHTML = '';
-  const total = Object.values(services).reduce((a, b) => a + b, 0);
-  SUB.textContent = `${total.toLocaleString()} total services recorded in ${year}`;
-
-  Object.entries(services).forEach(([label, val], i) => {
-    const card = document.createElement('div');
-    card.className = 'victim-card';
-    card.style.borderLeftColor = COLORS[i % COLORS.length];
-    card.innerHTML = `
-      <div class="victim-title">${label}</div>
-      <div class="victim-value">${Math.round((val / total) * 100)}%</div>
-    `;
-    card.onmouseenter = () => showDescription(label);
-    WRAP.appendChild(card);
-  });
-
-  showDescription(Object.keys(SERVICE_GROUPS)[0]);
+async function loadVictimData() {
+  const buf = await fetch(`${FOLDER}victims_2023.xlsx`).then(r => r.arrayBuffer());
+  const wb = XLSX.read(buf, { type: 'array' });
+  const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+  return raw.map(row => {
+    const id = parseInt(String(row['Case ID']).trim(), 10);
+    if (!Number.isInteger(id)) return null;
+    const count = +row['service records'] || 0;
+    return {
+      count,
+      letters: LETTERS.filter(L => String(row[L]).trim().toLowerCase() === 'yes')
+    };
+  }).filter(Boolean);
 }
 
-function showDescription(key) {
-  DETAIL.innerHTML = `
-    <h3>${key}</h3>
+function renderVictimDashboard(data) {
+  const total = data.reduce((sum, r) => sum + r.count, 0);
+  const letterCounts = Object.fromEntries(LETTERS.map(L => [L, 0]));
+  data.forEach(r => r.letters.forEach(L => letterCounts[L]++));
+
+  document.getElementById('victimSub').innerHTML = `
+    <strong>${total.toLocaleString()}</strong> service records across
+    <strong>${data.length}</strong> cases
+  `;
+
+  const statsWrap = document.getElementById('victimStatsWrap');
+  statsWrap.innerHTML = '';
+
+  LETTERS.forEach((L, i) => {
+    const count = letterCounts[L];
+    const percent = ((count / data.length) * 100).toFixed(1);
+    const color = COLORS[i % COLORS.length];
+    const div = document.createElement('div');
+    div.className = 'victim-card';
+    div.style.borderLeftColor = color;
+    div.innerHTML = `
+      <div class="victim-title">${LETTER_DESC[L]}</div>
+      <div class="victim-value" style="color:${color}">${count} cases</div>
+      <div style="font-size:0.9rem;color:#666">(${percent}% of total)</div>
+    `;
+    div.onmouseenter = () => div.style.background = fadeColor(color, 0.1);
+    div.onmouseleave = () => div.style.background = '#fff';
+    statsWrap.appendChild(div);
+  });
+
+  renderDescriptions();
+}
+
+function renderDescriptions() {
+  const wrap = document.getElementById('victimDescWrap');
+  wrap.innerHTML = `
+    <h3>Service Descriptions</h3>
     <ul>
-      ${SERVICE_GROUPS[key].map(txt => `<li>${txt}</li>`).join('')}
+      <li><strong>A. Information and Referral:</strong> Info about victim rights, justice process, and referrals.</li>
+      <li><strong>B. Personal Advocacy / Accompaniment:</strong> Advocacy during interviews, help with public benefits, interpreter services, immigration help.</li>
+      <li><strong>C. Emotional Support or Safety Services:</strong> Crisis counseling, community response, emergency financial help, support groups.</li>
+      <li><strong>D. Shelter / Housing Services:</strong> Emergency shelter, relocation help, transitional housing.</li>
+      <li><strong>E. Criminal / Civil Justice Assistance:</strong> Updates on legal events, court support, restitution help, legal guidance.</li>
     </ul>
   `;
 }
 
-window.afterDataReady = window.afterDataReady || [];
-window.afterDataReady.push(() => buildVictimPanel(window.rows || []));
+(async () => {
+  const data = await loadVictimData();
+  renderVictimDashboard(data);
+})();

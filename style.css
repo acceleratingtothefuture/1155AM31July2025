@@ -380,4 +380,80 @@ select, input[type="checkbox"] {
   white-space: nowrap;
 }
 
+.victim-flex {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+.victim-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.victim-card {
+  cursor: pointer;
+  border-left: 8px solid #2196f3;
+  border-radius: 8px;
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: background 0.2s ease, transform 0.2s ease;
+  height: 120px;
+  min-height: 120px;
+  max-height: 120px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.victim-card:hover {
+  transform: translateY(-2px);
+  background: #f0f8ff;
+}
+
+.victim-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.victim-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.percent {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.victim-right {
+  flex: 1;
+  min-width: 360px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  min-height: 220px;
+  transition: all 0.3s ease;
+}
+
+.victim-desc-dynamic {
+  font-size: 1rem;
+  color: #333;
+  transition: opacity 0.3s ease;
+}
 

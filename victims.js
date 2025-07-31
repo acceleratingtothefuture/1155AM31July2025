@@ -18,8 +18,22 @@ const LETTER_DETAIL = {
 };
 const COLORS = ['#2196f3', '#4caf50', '#ff9800', '#e91e63', '#9c27b0'];
 
-async function loadVictimData() {
-  const buf = await fetch(`${FOLDER}victims_2023.xlsx`).then(r => r.arrayBuffer());
+let latestYear = null;
+
+async function discoverVictimYear() {
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear; y >= 2015; y--) {
+    const res = await fetch(`${FOLDER}victims_${y}.xlsx`, { method: 'HEAD' });
+    if (res.ok) {
+      latestYear = y;
+      return y;
+    }
+  }
+  throw new Error('No victim data files found');
+}
+
+async function loadVictimData(year) {
+  const buf = await fetch(`${FOLDER}victims_${year}.xlsx`).then(r => r.arrayBuffer());
   const wb = XLSX.read(buf, { type: 'array' });
   const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
 
@@ -41,7 +55,7 @@ function renderVictimDashboard(data) {
 
   document.getElementById('victimSub').innerHTML = `
     <strong>${total.toLocaleString()}</strong> service records across
-    <strong>${data.length}</strong> cases
+    <strong>${data.length}</strong> cases (${latestYear})
   `;
 
   const statsWrap = document.getElementById('victimStatsWrap');
@@ -61,12 +75,8 @@ function renderVictimDashboard(data) {
       <div class="percent">(${percent}% of total)</div>
     `;
 
-    div.onmouseenter = () => {
-      updateDescription(L, color);
-    };
-    div.onmouseleave = () => {
-      resetDescription();
-    };
+    div.onmouseenter = () => updateDescription(L, color);
+    div.onmouseleave = () => resetDescription();
 
     statsWrap.appendChild(div);
   });
@@ -94,6 +104,12 @@ function resetDescription() {
 }
 
 (async () => {
-  const data = await loadVictimData();
-  renderVictimDashboard(data);
+  try {
+    const year = await discoverVictimYear();
+    const data = await loadVictimData(year);
+    renderVictimDashboard(data);
+  } catch (err) {
+    document.getElementById('victimSub').textContent = 'No data available.';
+    console.error(err);
+  }
 })();

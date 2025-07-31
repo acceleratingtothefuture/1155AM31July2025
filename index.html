@@ -45,17 +45,18 @@
             <h2>Filters</h2>
 
             <label>Measure
-              <select id="metric">
-                <option value="all_cases">All cases received</option>
-                <optgroup label="Case status">
-                  <option value="Filed">Filed</option>
-                  <option value="Dismissed">Dismissed</option>
-                  <option value="Rejected">Rejected</option>
-                  <option value="Open">Open</option>
-                  <option value="Sentenced">Sentenced</option>
-                </optgroup>
-              </select>
-            </label>
+  <select id="metric">
+    <option value="all_cases">All cases received</option>
+    <option value="accepted">Accepted cases</option>
+    <option value="rejected">Rejected cases</option>
+
+    <optgroup label="Completed cases">
+      <option value="Sentenced">Sentenced</option>
+      <option value="Dismissed">Dismissed</option>
+    </optgroup>
+  </select>
+</label>
+
 
             <label>Time range
               <select id="range">

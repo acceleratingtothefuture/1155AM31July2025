@@ -354,3 +354,30 @@ select, input[type="checkbox"] {
   } */
 }
 
+.victim-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.victim-header h2 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.victim-sub {
+  font-size: 1.3rem;
+  color: #444;
+  font-weight: 500;
+}
+
+.victim-card {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.victim-value {
+  white-space: nowrap;
+}
+
+

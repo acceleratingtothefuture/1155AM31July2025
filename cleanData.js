@@ -1,47 +1,57 @@
 // cleanData.js
 /* =========================================================
+   SHARED HELPERS
+   ========================================================= */
+function tidy (s)              { return String(s ?? '').trim(); }
+function lcase(s)              { return tidy(s).toLowerCase(); }
+function yes(v)                { return lcase(v) === 'yes';     }
+
+/* Turn header names into trimmed / lower-case so “Case ID ”,
+   “ case id”, etc. all resolve to the same key                */
+function normKeys(rec){
+  const out = {};
+  for (const k in rec) out[k.trim().toLowerCase()] = rec[k];
+  return out;
+}
+
+/* =========================================================
    1.  CASES  ── helpers + normaliser
    ========================================================= */
 export const AGENCY_MAP = {
-  'attorney':               "Imperial County District Attorney's Office",
-  'el centro':              "El Centro Police Department",
-  'calexico':               "Calexico Police Department",
-  'brawley':                "Brawley Police Department",
-  'calipatria state':       "Calipatria State Prison",
-  'centinela':              "Centinela State Prison",
-  'sheriff':                "Imperial County Sheriff's Office",
-  'probation':              "Imperial County Probation Department",
-  'highway':                "California Highway Patrol",
-  'westmorland':            "Westmorland Police Department",
-  'narcotics':              "Imperial County Narcotics Task Force",
-  'homeland':               "Department of Homeland Security",
-  'parks':                  "CA State Parks",
-  'cdcr':                   "California Department of Corrections and Rehabilitation",
-  'parole':                 "California Department of Corrections and Rehabilitation",
-  'drug enforcement':       "Drug Enforcement Administration",
-  'border':                 "U.S. Customs and Border Patrol",
-  'land':                   "Bureau of Land Management",
-  'riverside sheriff':      "Riverside County Sheriff's Department",
+  'attorney'             : "Imperial County District Attorney's Office",
+  'el centro'            : "El Centro Police Department",
+  'calexico'             : "Calexico Police Department",
+  'brawley'              : "Brawley Police Department",
+  'calipatria state'     : "Calipatria State Prison",
+  'centinela'            : "Centinela State Prison",
+  'sheriff'              : "Imperial County Sheriff's Office",
+  'probation'            : "Imperial County Probation Department",
+  'highway'              : "California Highway Patrol",
+  'westmorland'          : "Westmorland Police Department",
+  'narcotics'            : "Imperial County Narcotics Task Force",
+  'homeland'             : "Department of Homeland Security",
+  'parks'                : "CA State Parks",
+  'cdcr'                 : "California Department of Corrections and Rehabilitation",
+  'parole'               : "California Department of Corrections and Rehabilitation",
+  'drug enforcement'     : "Drug Enforcement Administration",
+  'border'               : "U.S. Customs and Border Patrol",
+  'land'                 : "Bureau of Land Management",
+  'riverside sheriff'    : "Riverside County Sheriff's Department",
 };
 
 export const SUBTYPE_MAP = {
-  'dv':                     'Domestic Violence',
-  'dvrt':                   'Domestic Violence',
-  'spu':                    'Special Prosecution Unit (SPU)',
-  'svu':                    'Special Victims Unit (SVU)',
-  'icac':                   'Internet Crimes Against Children (ICAC)',
-  'dui':                    'DUI',
-  'welfare':                'Welfare Fraud',
-  'fraud':                  'Fraud',
-  'elder':                  'Elder Abuse',
-  'parole':                 'Parole Revocation',
-  'mandatory supervision':  'Mandatory Supervision',
-  // …add more as needed
+  'dv'                    : 'Domestic Violence',
+  'dvrt'                  : 'Domestic Violence',
+  'spu'                   : 'Special Prosecution Unit (SPU)',
+  'svu'                   : 'Special Victims Unit (SVU)',
+  'icac'                  : 'Internet Crimes Against Children (ICAC)',
+  'dui'                   : 'DUI',
+  'welfare'               : 'Welfare Fraud',
+  'fraud'                 : 'Fraud',
+  'elder'                 : 'Elder Abuse',
+  'parole'                : 'Parole Revocation',
+  'mandatory supervision' : 'Mandatory Supervision',
 };
-
-/* ---------- small helpers ---------- */
-function tidy (s)        { return String(s ?? '').trim(); }
-function lcase(s)        { return tidy(s).toLowerCase(); }
 
 export function canonicalAgency(raw){
   const txt = lcase(raw);
@@ -60,32 +70,34 @@ export function canonicalSubtype(raw){
     }
   }
   // fallback: nicely-capitalised original
-  return tidy(raw).replace(/\s+/g,' ')
-                  .replace(/\b\w/g, c => c.toUpperCase());
+  return tidy(raw)
+          .replace(/\s+/g,' ')
+          .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-/* ---------- CASES normaliser ---------- */
-export function cleanCaseRow(row){
-  /* skip access-denied rows (Case ID non-numeric) */
-  const id = parseInt(tidy(row['Case ID']),10);
+export function cleanCaseRow(rec){
+  const row = normKeys(rec);
+
+  /* access-denied rows have a non-numeric Case ID */
+  const id = parseInt(row['case id'], 10);
   if (!Number.isInteger(id)) return null;
 
   return {
-    case_id         : id,
-    date_da         : row['Case Received By DA'],
-    severity        : (t => t.toUpperCase() === 'VOP' ? 'Violation of Probation' : t)(tidy(row['Severity'])),
-    agency          : canonicalAgency(row['Arresting Agency']),
-    city            : tidy(row['Location City']),
-    status          : tidy(row['Status']),
-    sub_type        : canonicalSubtype(row['Case Sub Type']),
-    days_to_file    : +row['Days to file requested charges']                         || 0,
-    days_file_to_sent: parseInt(tidy(row['Days from charges filed to sentencing']),10) || null,
-    victim_case     : /case has a victim/i.test(row['Victim Case']),
+    case_id          : id,
+    date_da          : row['case received by da'],
+    severity         : (t => t.toUpperCase()==='VOP' ? 'Violation of Probation' : t)(tidy(row['severity'])),
+    agency           : canonicalAgency(row['arresting agency']),
+    city             : tidy(row['location city']),
+    status           : tidy(row['status']),
+    sub_type         : canonicalSubtype(row['case sub type']),
+    days_to_file     : +row['days to file requested charges'] || 0,
+    days_file_to_sent: parseInt(tidy(row['days from charges filed to sentencing']),10) || null,
+    victim_case      : /case has a victim/i.test(row['victim case']),
   };
 }
 
 /* =========================================================
-   2.  DEFENDANTS ── helpers + normaliser
+   2.  DEFENDANTS ── normaliser
    ========================================================= */
 function canonicalGender(raw){
   const t = lcase(raw);
@@ -99,19 +111,12 @@ function canonicalResident(raw){
   if (t.startsWith('not'))    return 'Non-resident';
   return 'Unknown';
 }
-/* turn header names into trimmed / lower-case to dodge extra spaces */
-function normKeys(rec){
-  const out = {};
-  for (const k in rec) out[k.trim().toLowerCase()] = rec[k];
-  return out;
-}
 
-/* ---------- DEFENDANTS normaliser ---------- */
-export function cleanDefRow(rawRec){
-  const row = normKeys(rawRec);
+export function cleanDefRow(rec){
+  const row = normKeys(rec);
 
-  const id = parseInt(tidy(row['case id']),10);
-  if (!Number.isInteger(id)) return null;        // access denied row
+  const id = parseInt(row['case id'],10);
+  if (!Number.isInteger(id)) return null;   // access denied row
 
   return {
     case_id   : id,
@@ -120,5 +125,33 @@ export function cleanDefRow(rawRec){
     county_res: canonicalResident(row['county resident']),
     age       : (()=>{ const n = parseInt(tidy(row['defendant age']),10);
                        return Number.isFinite(n) ? n : null; })(),
+  };
+}
+
+/* =========================================================
+   3.  VICTIM SERVICE RECORDS ── normaliser
+   ========================================================= */
+export function cleanVictimRow(rec){
+  const row = normKeys(rec);
+
+  const id = parseInt(row['case id'],10);
+  if (!Number.isInteger(id)) return null;   // skip access-denied rows
+
+  return {
+    case_id        : id,
+    date_da        : row['case received by da'],
+
+    /* service flags (true = “yes”, false otherwise) */
+    a      : yes(row['a']),
+    b      : yes(row['b']),
+    c      : yes(row['c']),
+    d      : yes(row['d']),
+    e      : yes(row['e']),
+    calvcb : yes(row['calvcb']),
+    unmet  : yes(row['unmet']),
+    gen    : yes(row['gen']),
+    vwr    : yes(row['vwr']),
+
+    service_records : +row['service records'] || 0
   };
 }

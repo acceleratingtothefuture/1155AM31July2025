@@ -54,6 +54,10 @@ const FOLDER = './data/';                         // ← change this line
 
 let rows = [], charts = [], pieChart = null;
 
+let fileChartObj = null;
+let sentChartObj = null;
+
+
 /*  <--  keep everything above here exactly as you have it  ­--> */
 
 discoverYears().then(YEARS => {
@@ -584,7 +588,7 @@ const labels = MONTH_NAMES.map((m, i) => {
   return isFinite(year) ? `${m} '${String(year).slice(-2)}` : m;
 });
 
-    new Chart(ctx,{
+    const chart = new Chart(ctx,{
       type:'line',
       data:{
         labels,
@@ -607,20 +611,39 @@ const labels = MONTH_NAMES.map((m, i) => {
           y:{beginAtZero:true,
              ticks:{callback:v=>Number.isInteger(v)?v:''}}
         },
-        onHover:(e,els)=>{
-          if (els.length){
-            const i = els[0].index;
-elVal.textContent = data[i] != null ? data[i].toFixed(1) + ' days' : 'N/A';
-            elMon.textContent = labels[i];
-          }else{
-elVal.textContent = data.at(-1) != null ? data.at(-1).toFixed(1) + ' days' : 'N/A';
-            elMon.textContent = '';
-          }
-        }
+        onHover: (e, els) => {
+  const idx = els.length ? els[0].index : null;
+
+  const update = (chart, data, valId, monthId) => {
+    if (!chart) return;
+    const valBox = document.getElementById(valId);
+    const monBox = document.getElementById(monthId);
+
+    if (idx != null) {
+      chart.setActiveElements([{ datasetIndex: 0, index: idx }]);
+      valBox.textContent = data[idx] != null ? data[idx].toFixed(1) + ' days' : 'N/A';
+      monBox.textContent = chart.data.labels[idx];
+    } else {
+      chart.setActiveElements([]);
+      valBox.textContent = data.at(-1) != null ? data.at(-1).toFixed(1) + ' days' : 'N/A';
+      monBox.textContent = '';
+    }
+
+    chart.update();
+  };
+
+  update(fileChartObj, fileAvg, 'fileValue', 'fileMonth');
+  update(sentChartObj, sentAvg, 'sentValue', 'sentMonth');
+}
+
       },
 
       plugins:[hoverBar]
     });
+
+   if (idCanvas === 'fileChart') fileChartObj = chart;
+if (idCanvas === 'sentChart') sentChartObj = chart;
+
   }
 
   /* build the two big charts */

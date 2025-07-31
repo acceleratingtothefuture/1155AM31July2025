@@ -1,8 +1,7 @@
-/* victims.js — VICTIM SERVICES DASHBOARD */
 import { fadeColor } from './app.js';
 
 const FOLDER = './data/';
-const LETTERS = ['A','B','C','D','E'];
+const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 const LETTER_DESC = {
   A: 'Information and Referral',
   B: 'Personal Advocacy / Accompaniment',
@@ -10,15 +9,20 @@ const LETTER_DESC = {
   D: 'Shelter / Housing Services',
   E: 'Criminal / Civil Justice System Assistance'
 };
-
-const COLORS = [
-  '#2196f3', '#4caf50', '#ff9800', '#e91e63', '#9c27b0'
-];
+const LETTER_DETAIL = {
+  A: 'Info about victim rights, justice process, and referrals.',
+  B: 'Advocacy during interviews, help with public benefits, interpreter services, immigration help.',
+  C: 'Crisis counseling, community response, emergency financial help, support groups.',
+  D: 'Emergency shelter, relocation help, transitional housing.',
+  E: 'Updates on legal events, court support, restitution help, legal guidance.'
+};
+const COLORS = ['#2196f3', '#4caf50', '#ff9800', '#e91e63', '#9c27b0'];
 
 async function loadVictimData() {
   const buf = await fetch(`${FOLDER}victims_2023.xlsx`).then(r => r.arrayBuffer());
   const wb = XLSX.read(buf, { type: 'array' });
   const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+
   return raw.map(row => {
     const id = parseInt(String(row['Case ID']).trim(), 10);
     if (!Number.isInteger(id)) return null;
@@ -47,34 +51,46 @@ function renderVictimDashboard(data) {
     const count = letterCounts[L];
     const percent = ((count / data.length) * 100).toFixed(1);
     const color = COLORS[i % COLORS.length];
+
     const div = document.createElement('div');
     div.className = 'victim-card';
     div.style.borderLeftColor = color;
     div.innerHTML = `
       <div class="victim-title">${LETTER_DESC[L]}</div>
       <div class="victim-value" style="color:${color}">${count} cases</div>
-      <div style="font-size:0.9rem;color:#666">(${percent}% of total)</div>
+      <div class="percent">(${percent}% of total)</div>
     `;
-    div.onmouseenter = () => div.style.background = fadeColor(color, 0.1);
-    div.onmouseleave = () => div.style.background = '#fff';
+
+    div.onmouseenter = () => {
+      updateDescription(L, color);
+    };
+    div.onmouseleave = () => {
+      resetDescription();
+    };
+
     statsWrap.appendChild(div);
   });
-
-  renderDescriptions();
 }
 
-function renderDescriptions() {
-  const wrap = document.getElementById('victimDescWrap');
-  wrap.innerHTML = `
-    <h3>Service Descriptions</h3>
-    <ul>
-      <li><strong>A. Information and Referral:</strong> Info about victim rights, justice process, and referrals.</li>
-      <li><strong>B. Personal Advocacy / Accompaniment:</strong> Advocacy during interviews, help with public benefits, interpreter services, immigration help.</li>
-      <li><strong>C. Emotional Support or Safety Services:</strong> Crisis counseling, community response, emergency financial help, support groups.</li>
-      <li><strong>D. Shelter / Housing Services:</strong> Emergency shelter, relocation help, transitional housing.</li>
-      <li><strong>E. Criminal / Civil Justice Assistance:</strong> Updates on legal events, court support, restitution help, legal guidance.</li>
-    </ul>
-  `;
+function updateDescription(letter, color) {
+  const box = document.getElementById('victimDescBox');
+  box.style.opacity = 0;
+  setTimeout(() => {
+    box.innerHTML = `
+      <h3 style="color:${color}">${LETTER_DESC[letter]}</h3>
+      <p>${LETTER_DETAIL[letter]}</p>
+    `;
+    box.style.opacity = 1;
+  }, 150);
+}
+
+function resetDescription() {
+  const box = document.getElementById('victimDescBox');
+  box.style.opacity = 0;
+  setTimeout(() => {
+    box.innerHTML = `<h3>Hover a service type to see description</h3>`;
+    box.style.opacity = 1;
+  }, 150);
 }
 
 (async () => {

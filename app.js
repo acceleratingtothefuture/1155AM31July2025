@@ -23,7 +23,7 @@ const COLORS = [
   '#00bcd4', '#9c27b0', '#f44336', '#3f51b5', '#2196f3', '#795548'
 ];
 
-const STATUS_TYPES = ['Filed', 'Dismissed', 'Rejected', 'Open', 'Sentenced'];
+const STATUS_TYPES = ['Filed', 'Dismissed', 'Rejected', 'Open', 'Sentenced', 'accepted','rejected'];
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug',
                      'Sep','Oct','Nov','Dec'];
@@ -281,21 +281,26 @@ function metricBuckets(metric){
       return { bucket: statusCounts.Rejected || {},
                group : groupStatus.Rejected || {} };
 
-    case 'accepted': {          // everything *except* rejected
-      const bucket = {}, group = {};
-      ['Filed','Open','Sentenced','Dismissed'].forEach(s=>{
-        const src = statusCounts[s] || {};
-        for (const k in src) bucket[k]=(bucket[k]||0)+src[k];
+    case 'accepted': {          // all – rejected
+  const bucket = {}, group = {};
 
-        const gsrc = groupStatus[s] || {};
-        for (const g in gsrc){
-          group[g]??={};
-          for (const k in gsrc[g])
-            group[g][k]=(group[g][k]||0)+gsrc[g][k];
-        }
-      });
-      return {bucket,group};
+  /* bucket (overall counts) */
+  for (const k in allCounts){
+    bucket[k] = (allCounts[k] || 0) -
+                (statusCounts.Rejected?.[k] || 0);
+  }
+
+  /* group-level counts */
+  for (const g in groupAll){
+    group[g] = {};
+    for (const k in groupAll[g]){
+      const rej = groupStatus.Rejected?.[g]?.[k] || 0;
+      group[g][k] = (groupAll[g][k] || 0) - rej;
     }
+  }
+  return { bucket, group };
+}
+
 
     case 'Sentenced':
     case 'Dismissed':

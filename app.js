@@ -154,7 +154,7 @@ document.getElementById('pieToggle').onchange = build;
 
 function initDimension() {
   const sel = document.getElementById('dimension');
-  const ignore = ['case_id', 'date_da', 'year', 'month', 'quarter', `ts`, `days_to_file`,`days_file_to_sent`, `age`, `status`];
+  const ignore = ['case_id', 'date_da', 'year', 'month', 'quarter', `ts`, `days_to_file`,`days_file_to_sent`, `age`, ];
   sel.innerHTML = Object.keys(rows[0])
     .filter(k => !ignore.includes(k))
     .map(k =>

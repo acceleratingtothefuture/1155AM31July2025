@@ -387,3 +387,39 @@ select, input[type="checkbox"] {
   padding: 40px 20px 60px;
 }
 
+.victim-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 0 0 360px; /* lock width */
+}
+
+.victim-card {
+  width: 100%;
+  height: 120px;
+  min-height: 120px;
+  max-height: 120px;
+  overflow: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #fff;
+  transition: background 0.2s ease, transform 0.2s ease;
+  border-left: 8px solid #2196f3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.victim-card:hover {
+  background: #f0f8ff;
+  transform: translateY(-2px);
+}
+
+.victim-title,
+.victim-value,
+.percent {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

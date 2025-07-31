@@ -281,3 +281,76 @@ select, input[type="checkbox"] {
 }
 
 .chart-box .chart-number{ min-height:0.5rem; }
+
+.victim-flex {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+.victim-left {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  flex: 1;
+}
+
+.victim-right {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  min-height: 220px;
+  transition: all 0.3s ease;
+}
+
+.victim-desc-dynamic {
+  font-size: 1rem;
+  color: #333;
+  transition: opacity 0.3s ease;
+}
+
+.victim-card {
+  cursor: pointer;
+  border-left: 8px solid #2196f3;
+  border-radius: 8px;
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.victim-card:hover {
+  transform: translateY(-2px);
+  background: #f0f8ff;
+}
+
+.victim-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.victim-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.victim-card .percent {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Optional: comment to revisit for mobile */
+@media (max-width: 800px) {
+  /* Future stacking layout */
+  /* .victim-flex {
+    flex-direction: column;
+  } */
+}
+

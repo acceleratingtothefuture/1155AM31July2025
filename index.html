@@ -28,8 +28,8 @@
 
   <!-- toggle buttons -->
   <div class="view-toggle">
-    <button id="toMain">Dashboard</button>
-    <button id="toStats">Averages</button>
+    <button id="toMain">Case Statistics</button>
+    <button id="toStats">Processing Times</button>
     <button id="toMonthly">Victim Services</button>
   </div>
 
@@ -131,13 +131,12 @@
 <!-- ===== PANEL 3 : Victim Services Dashboard ===== -->
 <section id="panelVictims" class="victim-panel">
   <div class="victim-wrapper">
-
-  <div class="victim-top">
+  <div id="victimHeader" class="victim-header">
     <h2>Victim Services</h2>
     <p id="victimSub" class="victim-sub">Loading…</p>
   </div>
 
-  <div class="victim-main">
+  <div class="victim-flex">
     <div class="victim-left" id="victimStatsWrap"></div>
 
     <div class="victim-right">
@@ -146,9 +145,7 @@
       </div>
     </div>
   </div>
-
-</div>
-
+  </div>
 </section>
 
 

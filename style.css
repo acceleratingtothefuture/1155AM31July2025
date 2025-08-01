@@ -422,3 +422,18 @@ select, input[type="checkbox"] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+#panelVictims {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px 60px;
+}
+
+.victim-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+

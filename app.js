@@ -182,6 +182,8 @@ function fadeColor(hex,a=.18){
   return `rgba(${r},${g},${b},${a})`;
 }
 
+export { fadeColor };
+
 /***** BUILD DASHBOARD *****/
 function build() {
   if (largeChart) {

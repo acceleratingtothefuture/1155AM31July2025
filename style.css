@@ -14,7 +14,7 @@ select, input[type="checkbox"] {
 .site-header {
   background: linear-gradient(90deg, #2c3e50, #34495e);
   color: #fff;
-  padding: 40px 20px;
+  padding: 20px 20px;
   text-align: center;
 }
 .site-header h1 {
@@ -34,7 +34,8 @@ select, input[type="checkbox"] {
 }
 .sidebar {
   background: #fff;
-  padding: 24px;
+  padding-top: 0px;
+  padding-bottom: 24px;
   width: 260px;
   border-right: 1px solid #ddd;
 }
@@ -195,7 +196,7 @@ select, input[type="checkbox"] {
   display:flex;
   transition:transform .6s ease;
 }
-#panelMain,#panelStats,#panelMonthly {
+#panelMain,#panelStats{
   width:33.3333%;
   min-width:600px;
   padding:40px 20px 0;
@@ -370,7 +371,7 @@ select, input[type="checkbox"] {
 }
 
 .victim-card {
-  min-height: 120px;
+  min-height: 100px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -390,7 +391,7 @@ select, input[type="checkbox"] {
 .victim-left {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   flex: 0 0 360px; /* lock width */
 }
 
@@ -405,15 +406,11 @@ select, input[type="checkbox"] {
   flex-direction: column;
   justify-content: center;
   background: #fff;
-  transition: background 0.2s ease, transform 0.2s ease;
   border-left: 8px solid #2196f3;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.victim-card:hover {
-  background: #f0f8ff;
-  transform: translateY(-2px);
-}
+
 
 .victim-title,
 .victim-value,
@@ -423,17 +420,25 @@ select, input[type="checkbox"] {
   text-overflow: ellipsis;
 }
 
-#panelVictims {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 40px 20px 60px;
-}
 
 .victim-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
 }
 
+section#panelVictims.victim-panel {
+  display: flex;
+  justify-content: center;
+   margin: 0px 20px 0px 520px;
+}
+
+
+div#victimDescBox.victim-desc-dynamic {
+  margin: 0px 0px 0px 0px;
+  max-width: 300px;
+}
 

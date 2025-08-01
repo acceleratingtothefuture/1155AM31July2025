@@ -205,22 +205,24 @@ function build() {
 
   /* buckets */
   const buckets = [];
- if (range === 'last12') {
-  const maxD = new Date(Math.max(...rows.map(r => r.ts)));
+if (range === 'last12') {
+  const maxTs = Math.max(...rows.map(r => r.ts));
+  const maxD = new Date(maxTs);
+  const startYear = maxD.getFullYear();
+  const startMonth = maxD.getMonth(); // 0-based
 
   for (let i = 11; i >= 0; i--) {
-    const d = new Date(maxD);
-    d.setMonth(d.getMonth() - i);
-    const y = d.getFullYear();
-    const m = d.getMonth() + 1;
+    const offset = startMonth - i;
+    const y = startYear + Math.floor(offset / 12);
+    const m = (offset % 12 + 12) % 12; // handle negatives
 
-    buckets.push({
-      y, m,
-      label: `${MONTH_NAMES[m - 1]} '${String(y).slice(-2)}`,
-      key: `${y}-${m}`
-    });
+    const label = `${MONTH_NAMES[m]} '${String(y).slice(-2)}`;
+    const key = `${y}-${m + 1}`; // m is 0-based
+
+    buckets.push({ y, m: m + 1, label, key });
   }
 }
+
  else if (range === 'monthly') {
   const years = [...new Set(rows.map(r => r.year))].sort((a, b) => a - b);
   years.forEach(year =>
@@ -675,4 +677,5 @@ function activatePanel(index) {
 document.getElementById('toMain').onclick = () => activatePanel(0);
 document.getElementById('toStats').onclick = () => activatePanel(1);
 document.getElementById('toMonthly').onclick = () => activatePanel(2);
+
 

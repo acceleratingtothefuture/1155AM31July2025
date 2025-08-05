@@ -62,13 +62,18 @@ let sentChartObj = null;
 /*  <--  keep everything above here exactly as you have it  ­--> */
 
 discoverYears().then(YEARS => {
-  loadData(YEARS).then(() => {
+  Promise.all([
+    loadData(YEARS),
+    loadVictimDemographics(YEARS)
+  ]).then(() => {
     initDimension();
     build();
     initLargeChart();
     buildExtraCharts();
+    initVictimDemographics();
   });
 });
+
 
 /*  <--  keep everything below here exactly as you have it  ­--> */
 
@@ -678,5 +683,6 @@ function activatePanel(index) {
 document.getElementById('toMain').onclick = () => activatePanel(0);
 document.getElementById('toStats').onclick = () => activatePanel(1);
 document.getElementById('toMonthly').onclick = () => activatePanel(2);
+
 
 

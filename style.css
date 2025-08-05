@@ -444,9 +444,9 @@ select, input[type="checkbox"] {
 
 
 section#panelVictims.victim-panel {
-  display: flex;
-  justify-content: center;
-   margin: 0px 20px 0px 520px;
+  display: block;
+  margin: 0 auto;
+  padding: 40px 20px;
 }
 
 
@@ -892,5 +892,6 @@ div#victimDescBox.victim-desc-dynamic {
   color: #444;
   font-weight: 500;
 }
+
 
 

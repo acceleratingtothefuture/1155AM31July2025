@@ -50,14 +50,18 @@ export async function loadVictimDemographics(YEARS) {
 }
 
 export function initVictimDemographics() {
-  const years = Object.keys(demoData).sort((a, b) => b - a);
-  const btnWrap = document.getElementById('demoYearButtons');
+  const el = document.getElementById('demoYearButtons');
+  if (!el) {
+    requestAnimationFrame(() => initVictimDemographics());
+    return;
+  }
 
-  btnWrap.innerHTML = years.map((y, i) =>
+  const years = Object.keys(demoData).sort((a, b) => b - a);
+  el.innerHTML = years.map((y, i) =>
     `<button class="year-btn ${i === 0 ? 'active' : ''}" data-year="${y}">${y}</button>`
   ).join('');
 
-  btnWrap.querySelectorAll('button').forEach(btn => {
+  el.querySelectorAll('button').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -67,6 +71,7 @@ export function initVictimDemographics() {
 
   if (years.length) renderVictimCharts(years[0]);
 }
+
 
 function renderVictimCharts(year) {
   const data = demoData[year];

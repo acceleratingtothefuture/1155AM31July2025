@@ -13,6 +13,7 @@ function prettyName(key) {
   return map[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
+import { loadVictimDemographics, initVictimDemographics } from './victimDemo.js';
 
 /* --- normaliser helpers --- */
 import { cleanCaseRow, cleanDefRow } from '../cleanData.js';
@@ -677,4 +678,5 @@ function activatePanel(index) {
 document.getElementById('toMain').onclick = () => activatePanel(0);
 document.getElementById('toStats').onclick = () => activatePanel(1);
 document.getElementById('toMonthly').onclick = () => activatePanel(2);
+
 

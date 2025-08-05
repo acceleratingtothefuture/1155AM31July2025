@@ -35,11 +35,15 @@ export async function loadVictimDemographics(YEARS) {
           age <= 49 ? '35–49' :
           age <= 64 ? '50–64' : '65+';
 
-        return {
-          gender: gender === '' || /not reported/i.test(gender) ? 'Unknown' : gender,
-          age_group,
-          ethnicity: 'Unknown' // future use
-        };
+      const ethRaw = String(r['Ethnicity'] || '').trim();
+const ethnicity = ethRaw === '' || /not reported/i.test(ethRaw) ? 'Unknown' : ethRaw;
+
+return {
+  gender: gender === '' || /not reported/i.test(gender) ? 'Unknown' : gender,
+  age_group,
+  ethnicity
+};
+
       }).filter(Boolean);
 
       demoData[y] = cleaned;
